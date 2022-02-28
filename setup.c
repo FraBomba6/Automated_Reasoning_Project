@@ -122,8 +122,9 @@ void gen_dzn(int n, int hearts, int clubs, int spades, int diamonds, cell *cells
     char file_number[4] = "";
     char file_path[50] = "";
     sprintf(file_number, "%02d", m);
-    strcat(file_name, "/data_");
+    strcat(file_name, "/");
     strcat(file_name, file_number);
+    strcat(file_name, "_data");
     strcat(file_name, ".dzn");
     strcat(file_path, mzn_dir);
     strcat(file_path, file_name);
@@ -172,8 +173,9 @@ void gen_lp(int n, int hearts, int clubs, int spades, int diamonds, cell *cells,
     char file_number[4] = "";
     char file_path[50] = "";
     sprintf(file_number, "%02d", m);
-    strcat(file_name, "/data_");
+    strcat(file_name, "/");
     strcat(file_name, file_number);
+    strcat(file_name, "_data");
     strcat(file_name, ".lp");
     strcat(file_path, asp_dir);
     strcat(file_path, file_name);

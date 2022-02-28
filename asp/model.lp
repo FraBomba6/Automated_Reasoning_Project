@@ -8,7 +8,6 @@ simbolo(1..5).
 :- #count{X,Y : simbolo(S), S == 3, lato(X), lato(Y), griglia(X,Y,S)} > spades.
 :- #count{X,Y : simbolo(S), S == 4, lato(X), lato(Y), griglia(X,Y,S)} > diamonds.
 
-
 :- simbolo(S), lato(X), lato(Y1), lato(Y2), lato(Y3), lato(Y4),
    Y1 != Y2, Y1 != Y3, Y1 != Y4, Y2 != Y3, Y2 != Y4, Y3 != Y4,
    griglia(X,Y1,S), griglia(X,Y2,S), griglia(X,Y3,S), griglia(X,Y4,S).
