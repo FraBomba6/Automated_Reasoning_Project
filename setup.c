@@ -90,33 +90,6 @@ void print_matrix(int n, int blocked, int occupied, cell *cells) {
     }
 }
 
-char *gen_dir_name() {
-    char hours[4], minutes[4], seconds[4], day[4], month[4], year[8];
-    time_t now;
-    time(&now);
-    struct tm *local = localtime(&now);
-    sprintf(hours, "%02d", local->tm_hour);         // get hours since midnight (0-23)
-    sprintf(minutes, "%02d", local->tm_min);        // get minutes passed after the hour (0-59)
-    sprintf(seconds, "%02d", local->tm_sec);        // get seconds passed after a minute (0-59)
-
-    sprintf(day, "%02d", local->tm_mday);            // get day of month (1 to 31)
-    sprintf(month, "%02d", local->tm_mon + 2);      // get month of year (0 to 11)
-    sprintf(year, "%d", local->tm_year + 1900);
-    char *dir_name = malloc(40);
-    strcat(dir_name, year);
-    strcat(dir_name, "_");
-    strcat(dir_name, month);
-    strcat(dir_name, "_");
-    strcat(dir_name, day);
-    strcat(dir_name, "_");
-    strcat(dir_name, hours);
-    strcat(dir_name, "_");
-    strcat(dir_name, minutes);
-    strcat(dir_name, "_");
-    strcat(dir_name, seconds);
-    return dir_name;
-}
-
 void gen_dzn(int n, int hearts, int clubs, int spades, int diamonds, cell *cells, int cells_l, char *mzn_dir, int m) {
     char file_name[15] = "";
     char file_number[4] = "";
@@ -210,7 +183,7 @@ void gen_lp(int n, int hearts, int clubs, int spades, int diamonds, cell *cells,
     fclose(fptr);
 }
 
-int main() {
+int main(int argc, char *argv[]) {
     int n, m;
     char str_int[4];
     srand(time(NULL));
@@ -221,53 +194,60 @@ int main() {
            "\tCLUBS <--> 2\n"
            "\tSPADES <--> 3\n"
            "\tDIAMONDS <--> 4\n"
-           "Blocked cells are associated to 5.\n\n"
-           "Please input the dimension of the matrices:\n"
-           "\tn = ");
-    scanf("%d", &n);
-    printf("Please input the number of matrices you want to generate:\n"
-           "\tm = ");
-    scanf("%d", &m);
-    printf("Generating destination directories:\n");
-    char mzn_dir[40] = "./minizinc/";
-    sprintf(str_int, "%d", n);
-    strcat(mzn_dir, "size_");
-    strcat(mzn_dir, str_int);
-    mkdir(mzn_dir, 0700);
-    printf("\tGenerated folder %s\n", mzn_dir);
-    char asp_dir[40] = "./asp/";
-    strcat(asp_dir, "size_");
-    strcat(asp_dir, str_int);
-    mkdir(asp_dir, 0700);
-    printf("\tGenerated folder %s\n", asp_dir);
-    printf("----------------------------------------------------------------------\n");
-    for (int i = m; i > 0; i--) {
-        int blocked, occupied, hearts, clubs, spades, diamonds;
-        printf("Generating matrix #%d ...\n", m-i+1);
-        printf("\tGenerating cardinality of sets:\n");
-        blocked = (rand() % (n*n/3)) + 1;
-        printf("\t\tRandom number of blocked cells blocks = %d\n", blocked);
-        occupied = (rand() % (n*n/3)) + 1;
-        printf("\t\tRandom number of occupied cells occupied = %d\n", occupied);
-        hearts = (rand() % (n*n)) + 1;
-        printf("\t\tRandom number of hearts cards hearts = %d\n", hearts);
-        clubs = (rand() % (n*n)) + 1;
-        printf("\t\tRandom number of clubs cards clubs = %d\n", clubs);
-        spades = (rand() % (n*n)) + 1;
-        printf("\t\tRandom number of spades cards spades = %d\n", spades);
-        diamonds = (rand() % (n*n)) + 1;
-        printf("\t\tRandom number of diamonds cards diamonds = %d\n", diamonds);
-        printf("\tGenerating coordinates for blocked and occupied cells:\n");
-        cell *cells = gen_cells(n, blocked, occupied, hearts, clubs, spades, diamonds);
-        printf("\t\t");
-        for (int l = 0; l < blocked + occupied; l++) {
-            printf("| (%d, %d, %d) ", cells[l].x, cells[l].y, cells[l].s);
+           "Blocked cells are associated to 5.\n\n");
+    if (argc < 2) {
+        printf("Please input the dimension of the matrices:\n"
+               "\tn = ");
+        scanf("%d", &n);
+        printf("Please input the number of matrices you want to generate:\n"
+               "\tm = ");
+        scanf("%d", &m);
+    } else
+        m = 10;
+    for(int i = 1; i < argc; i++) {
+        if (argc > 1)
+            n = atoi(argv[i]);
+        printf("Generating destination directories:\n");
+        char mzn_dir[40] = "./minizinc/data/";
+        sprintf(str_int, "%d", n);
+        strcat(mzn_dir, "size_");
+        strcat(mzn_dir, str_int);
+        mkdir(mzn_dir, 0700);
+        printf("\tGenerated folder %s\n", mzn_dir);
+        char asp_dir[40] = "./asp/data/";
+        strcat(asp_dir, "size_");
+        strcat(asp_dir, str_int);
+        mkdir(asp_dir, 0700);
+        printf("\tGenerated folder %s\n", asp_dir);
+        printf("----------------------------------------------------------------------\n");
+        for (int i = m; i > 0; i--) {
+            int blocked, occupied, hearts, clubs, spades, diamonds;
+            printf("Generating matrix #%d ...\n", m - i + 1);
+            printf("\tGenerating cardinality of sets:\n");
+            blocked = (rand() % (n * n / 3)) + 1;
+            printf("\t\tRandom number of blocked cells blocks = %d\n", blocked);
+            occupied = (rand() % (n * n / 3)) + 1;
+            printf("\t\tRandom number of occupied cells occupied = %d\n", occupied);
+            hearts = (rand() % (n * n)) + 1;
+            printf("\t\tRandom number of hearts cards hearts = %d\n", hearts);
+            clubs = (rand() % (n * n)) + 1;
+            printf("\t\tRandom number of clubs cards clubs = %d\n", clubs);
+            spades = (rand() % (n * n)) + 1;
+            printf("\t\tRandom number of spades cards spades = %d\n", spades);
+            diamonds = (rand() % (n * n)) + 1;
+            printf("\t\tRandom number of diamonds cards diamonds = %d\n", diamonds);
+            printf("\tGenerating coordinates for blocked and occupied cells:\n");
+            cell *cells = gen_cells(n, blocked, occupied, hearts, clubs, spades, diamonds);
+            printf("\t\t");
+            for (int l = 0; l < blocked + occupied; l++) {
+                printf("| (%d, %d, %d) ", cells[l].x, cells[l].y, cells[l].s);
+            }
+            printf("|\n");
+            printf("\tMatrix #%d:\n", m - i + 1);
+            print_matrix(n, blocked, occupied, cells);
+            gen_dzn(n, hearts, clubs, spades, diamonds, cells, blocked + occupied, mzn_dir, m - i + 1);
+            gen_lp(n, hearts, clubs, spades, diamonds, cells, blocked + occupied, asp_dir, m - i + 1);
+            printf("************************************************************\n");
         }
-        printf("|\n");
-        printf("\tMatrix #%d:\n", m-i+1);
-        print_matrix(n, blocked, occupied, cells);
-        gen_dzn(n, hearts, clubs, spades, diamonds, cells, blocked + occupied, mzn_dir, m-i+1);
-        gen_lp(n, hearts, clubs, spades, diamonds, cells, blocked + occupied, asp_dir, m-i+1);
-        printf("************************************************************\n");
     }
 }
