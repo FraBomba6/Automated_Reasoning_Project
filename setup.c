@@ -184,7 +184,7 @@ void gen_lp(int n, int hearts, int clubs, int spades, int diamonds, cell *cells,
 }
 
 int main(int argc, char *argv[]) {
-    int n, m;
+    int n, m, cmd = 0;
     char str_int[4];
     srand(time(NULL));
     printf("Hi!\n"
@@ -202,11 +202,15 @@ int main(int argc, char *argv[]) {
         printf("Please input the number of matrices you want to generate:\n"
                "\tm = ");
         scanf("%d", &m);
-    } else
+    } else {
         m = 10;
-    for(int i = 1; i < argc; i++) {
+        cmd = 1;
+    }
+    for(int i = 1; i < argc || !cmd; i++) {
         if (argc > 1)
             n = atoi(argv[i]);
+        else
+            cmd = 1;
         printf("Generating destination directories:\n");
         char mzn_dir[40] = "./minizinc/data/";
         sprintf(str_int, "%d", n);
