@@ -121,17 +121,11 @@ void evaluate_model_and_write_results(FILE *jsonptr, char *file_path, int is_mzn
     }
 
     clock_t start = clock_gettime_nsec_np(CLOCK_MONOTONIC);
-    system(command);
-    clock_t end = clock_gettime_nsec_np(CLOCK_MONOTONIC);;
-    double time_spent = (double)(end - start) / 10e8;
-    fprintf(jsonptr, "%s", "\t\t\t\t\"execution_time\":");
-    fprintf(jsonptr, "%.4f", time_spent);
-    fprintf(jsonptr, "%s", ",\n");
-
     fprintf(jsonptr, "%s", "\t\t\t\t\"steps\":[\n");
     shptr = popen(command, "r");
     int step_count = 1;
     while (fgets(line, 1000, shptr) != NULL) {
+        printf("%s", line);
         if (step_count != 1 && strncmp(line, "griglia", 7) == 0)
             fprintf(jsonptr, "%s", ",\n");
         if (strncmp(line, "griglia", 7) == 0) {
@@ -172,7 +166,12 @@ void evaluate_model_and_write_results(FILE *jsonptr, char *file_path, int is_mzn
             fprintf(jsonptr, "%s", "\t\t\t\t\t}");
         }
     }
-    fprintf(jsonptr, "%s", "\n\t\t\t\t]\n");
+    fprintf(jsonptr, "%s", "\n\t\t\t\t],\n");
+    clock_t end = clock_gettime_nsec_np(CLOCK_MONOTONIC);
+    double time_spent = (double)(end - start) / 10e8;
+    fprintf(jsonptr, "%s", "\t\t\t\t\"execution_time\":");
+    fprintf(jsonptr, "%.4f", time_spent);
+    fprintf(jsonptr, "%s", "\n");
 }
 
 int main(int argc, char **argv) {
@@ -205,9 +204,9 @@ int main(int argc, char **argv) {
             if (mzn_dirent->d_type == DT_REG) {
                 file_count += 1;
                 int file_number = atoi(mzn_dirent->d_name);
-                printf(".-----------------------------------.\n"
-                       "| Working on data file %s |\n"
-                       "'-----------------------------------'\n", mzn_dirent->d_name);
+                printf(".---------------------------------------------.\n"
+                       "| Working on size %d with data file %s|\n"
+                       "'---------------------------------------------'\n", atoi(token), mzn_dirent->d_name);
                 char mzn_file_path[100];
                 strcpy(mzn_file_path, mzn_dir_path);
                 strcat(mzn_file_path, "/");
