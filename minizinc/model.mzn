@@ -114,11 +114,5 @@ constraint p =
   );
 solve maximize p;
 
-%output [
-%  if j = 1 then "\n" else " " endif ++
-%  show(m[i,j])
-%  | i,j in 1..n
-%] ++ ["\n\n"] ++ ["p = " ++ show(p)];
-
 output["griglia(" ++ show(i) ++ "," ++ show(j) ++ "," ++ show(m[i,j]) ++ ") " | i,j in 1..n] ++
       ["\nOptimization: " ++ show(p)]
