@@ -89,7 +89,7 @@ void evaluate_model_and_write_results(FILE *jsonptr, char *file_path, int is_mzn
             line_count += 1;
         }
     else
-        while (fgets(line, 1000, dataptr) != NULL) {
+        do {
             int tuple_len = strlen(line) - 10;
             char *tuple = (char *) malloc(sizeof(char) * (tuple_len + 1));
             strncpy(tuple, line + 8, tuple_len);
@@ -97,7 +97,7 @@ void evaluate_model_and_write_results(FILE *jsonptr, char *file_path, int is_mzn
             int y = atoi(strtok(NULL, ",")) - 1;
             int s = atoi(strtok(NULL, ","));
             m[x * n + y] = s;
-        }
+        } while (fgets(line, 1000, dataptr) != NULL);
     fprintf(jsonptr, "%s", "\t\t\t\t\"m\": [");
     for (int i = 0; i < n * n; i++) {
         fprintf(jsonptr, "%d", m[i]);
