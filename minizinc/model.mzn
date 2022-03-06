@@ -6,7 +6,7 @@ int: clubs;    % --> 2
 int: spades;   % --> 3
 int: diamonds; % --> 4
 
-array[1..n, 1..n] of var 1..5: m;
+array[1..n, 1..n] of var 0..5: m;
 var int: p;
 
 % Given the number of cards for each suit the program must not exceed that number
@@ -33,6 +33,10 @@ constraint p =
         m[i,j+1] != 5 /\
         m[i,j+2] != 5 /\
         m[i,j+3] != 5 /\
+        m[i,j] != 0 /\
+        m[i,j+1] != 0 /\
+        m[i,j+2] != 0 /\
+        m[i,j+3] != 0 /\
         m[i,j] != m[i,j+1] /\
         m[i,j] != m[i,j+2] /\
         m[i,j] != m[i,j+3] /\
@@ -51,6 +55,10 @@ constraint p =
         m[i+1,j] != 5 /\
         m[i+2,j] != 5 /\
         m[i+3,j] != 5 /\
+        m[i,j] != 0 /\
+        m[i+1,j] != 0 /\
+        m[i+2,j] != 0 /\
+        m[i+3,j] != 0 /\
         m[i,j] != m[i+1,j] /\
         m[i,j] != m[i+2,j] /\
         m[i,j] != m[i+3,j] /\
@@ -64,7 +72,7 @@ constraint p =
   ) +
   sum(i in 1..n)(
     sum(j in 1..n-2)(
-      if m[i,j] != 5 /\ m[i,j] == m[i,j+1] /\ m[i,j] == m[i,j+2]
+      if m[i,j] != 5 /\ m[i,j] != 0 /\ m[i,j] == m[i,j+1] /\ m[i,j] == m[i,j+2]
       then 3
       else 0
       endif
@@ -72,7 +80,7 @@ constraint p =
   ) + 
   sum(j in 1..n)(
     sum(i in 1..n-2)(
-      if m[i,j] != 5 /\ m[i,j] == m[i+1,j] /\ m[i,j] == m[i+2,j]
+      if m[i,j] != 5 /\ m[i,j] != 0 /\ m[i,j] == m[i+1,j] /\ m[i,j] == m[i+2,j]
       then 3
       else 0
       endif
@@ -82,6 +90,7 @@ constraint p =
     sum(j in 1..n-1)(
       if
         m[i,j] != 5 /\
+        m[i,j] != 0 /\
         if j+1 == n
         then m[i,j] == m[i,j+1] /\ m[i,j] != m[i,j-1]
         else
@@ -99,6 +108,7 @@ constraint p =
     sum(i in 1..n-1)(
       if
         m[i,j] != 5 /\
+        m[i,j] != 0 /\
         if i+1 == n
         then m[i,j] == m[i+1,j] /\ m[i,j] != m[i-1,j]
         else
