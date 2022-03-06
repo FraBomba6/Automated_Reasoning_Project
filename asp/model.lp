@@ -10,10 +10,12 @@ simbolo(1..5).
 
 :- simbolo(S), lato(X), lato(Y1), lato(Y2), lato(Y3), lato(Y4),
    Y1 != Y2, Y1 != Y3, Y1 != Y4, Y2 != Y3, Y2 != Y4, Y3 != Y4,
+   S != 5,
    griglia(X,Y1,S), griglia(X,Y2,S), griglia(X,Y3,S), griglia(X,Y4,S).
 
 :- simbolo(S), lato(Y), lato(X1), lato(X2), lato(X3), lato(X4),
    X1 != X2, X1 != X3, X1 != X4, X2 != X3, X2 != X4, X3 != X4,
+   S != 5,
    griglia(X1,Y,S), griglia(X2,Y,S), griglia(X3,Y,S), griglia(X4,Y,S).
 
 score(P) :- P = RowPokers * 6 + ColPokers * 4 + RowTrips * 3 + ColTrips * 3 + RowPairs + ColPairs, 
