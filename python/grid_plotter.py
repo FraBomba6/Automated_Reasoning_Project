@@ -170,7 +170,7 @@ if __name__ == '__main__':
         f.close()
     for key in results:
         n = int(key)
-        for i in range(1, 11):
+        for i in range(1, 21):
             mzn_result = Result(results[key]["mzn"][str(i)])
             asp_result = Result(results[key]["asp"][str(i)])
 
