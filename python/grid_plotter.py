@@ -1,7 +1,8 @@
 import json
 import os.path
 import sys
-
+import chime
+import tqdm
 import numpy as np
 import math
 import matplotlib.pyplot as pl
@@ -11,6 +12,8 @@ CLUBS_SYMBOL = u"\u2663"
 SPADES_SYMBOL = u"\u2660"
 DIAMONDS_SYMBOL = u"\u2666"
 BLOCKED_SYMBOL = u"\u2612"
+
+MIN_TABLE_HEIGHT = 2.5
 
 
 def get_symbol(value: int):
@@ -52,69 +55,71 @@ def check_dir_existence(path: str):
 
 
 def gen_matrix_fig(matrix, hearts, clubs, spades, diamonds, path, score=None, execution_time=None):
+    n = matrix.shape[0]
+    plotHeight = max(MIN_TABLE_HEIGHT, n * 0.5)
     symbol_matrix = symbolize_matrix(matrix)
     fontSize = 7
     textSize = 0.0138 * fontSize
     colWidths = [0.2] * n
     tableHeight = 0.225 * n
     horizontalPadding = (1.5 - 0.2 * n) / 2
-    pl.figure(figsize=(1.5, 2.5), dpi=200)
+    pl.figure(figsize=(1.5, plotHeight), dpi=200)
     pl.table(
         cellText=symbol_matrix,
         colWidths=colWidths,
-        bbox=[horizontalPadding / 1.5, (2.5 - tableHeight) / 2.5, 0.2 * n / 1.5, tableHeight / 2.5],
+        bbox=[horizontalPadding / 1.5, (plotHeight - tableHeight) / plotHeight, 0.2 * n / 1.5, tableHeight / plotHeight],
         cellLoc='center'
     )
     ax = pl.gca()
     ax.set_xticks([])
     ax.set_yticks([])
-    pl.text(0.05, 0.5 - textSize / 2.5, "Available", fontsize=fontSize)
+    pl.text(0.05, 0.5 - textSize / plotHeight, "Available", fontsize=fontSize)
     pl.text(
         0.05,
-        0.5 - textSize * 2 / 2.5 - 0.015,
+        0.5 - textSize * 2 / plotHeight - 0.015,
         "#" + HEARTS_SYMBOL + "=" + str(hearts - np.count_nonzero(matrix == 1)),
         fontsize=fontSize
     )
     pl.text(
         0.05,
-        0.5 - textSize * 3 / 2.5 - 0.045,
+        0.5 - textSize * 3 / plotHeight - 0.045,
         "#" + CLUBS_SYMBOL + "=" + str(clubs - np.count_nonzero(matrix == 2)),
         fontsize=fontSize
     )
     pl.text(
         0.05,
-        0.5 - textSize * 4 / 2.5 - 0.075,
+        0.5 - textSize * 4 / plotHeight - 0.075,
         "#" + SPADES_SYMBOL + "=" + str(spades - np.count_nonzero(matrix == 3)),
         fontsize=fontSize
     )
     pl.text(
         0.05,
-        0.5 - textSize * 5 / 2.5 - 0.105,
+        0.5 - textSize * 5 / plotHeight - 0.105,
         "#" + DIAMONDS_SYMBOL + "=" + str(diamonds - np.count_nonzero(matrix == 4)),
         fontsize=fontSize
     )
-    pl.text(0.55, 0.5 - textSize / 2.5, "Total", fontsize=fontSize)
+    pl.text(0.55, 0.5 - textSize / plotHeight, "Total", fontsize=fontSize)
     pl.text(
         0.55,
-        0.5 - textSize * 2 / 2.5 - 0.015,
+        0.5 - textSize * 2 / plotHeight - 0.015,
         "#" + HEARTS_SYMBOL + "=" + str(hearts),
         fontsize=fontSize
     )
     pl.text(
         0.55,
-        0.5 - textSize * 3 / 2.5 - 0.045,
+        0.5 - textSize * 3 / plotHeight - 0.045,
         "#" + CLUBS_SYMBOL + "=" + str(clubs),
         fontsize=fontSize
     )
     pl.text(
         0.55,
-        0.5 - textSize * 4 / 2.5 - 0.075,
+        0.5 - textSize * 4 / plotHeight - 0.075,
         "#" + SPADES_SYMBOL + "=" + str(spades),
         fontsize=fontSize
     )
     pl.text(
         0.55,
-        0.5 - textSize * 5 / 2.5 - 0.105,
+        0.5 - textSize * 5 / plotHeight - 0.105,
         "#" + DIAMONDS_SYMBOL + "=" + str(diamonds),
         fontsize=fontSize
     )
@@ -126,7 +131,7 @@ def gen_matrix_fig(matrix, hearts, clubs, spades, diamonds, path, score=None, ex
             color = "black"
             fontweight = "normal"
         pl.text(
-            0.05,
+            0.025,
             0.1,
             "Score = " + str(score),
             fontsize=fontSize,
@@ -135,7 +140,7 @@ def gen_matrix_fig(matrix, hearts, clubs, spades, diamonds, path, score=None, ex
         )
     if execution_time is not None:
         pl.text(
-            0.05,
+            0.025,
             0.1 - textSize/1.5,
             "Exec. time = " + str(execution_time),
             fontsize=fontSize
@@ -164,82 +169,95 @@ class Step:
 
 
 if __name__ == '__main__':
-    file = "../results/" + sys.argv[1]
-    with open(file, 'r') as f:
-        results = json.load(f)
-        f.close()
-    for key in results:
-        n = int(key)
-        for i in range(1, 21):
-            mzn_result = Result(results[key]["mzn"][str(i)])
-            asp_result = Result(results[key]["asp"][str(i)])
+    for arg in range(1, len(sys.argv)):
+        file = "../results/" + sys.argv[arg]
+        with open(file, 'r') as f:
+            results = json.load(f)
+            f.close()
+        for key in results:
+            n = int(key)
+            print("Working on size " + str(n) + "...")
+            matrix_pbar = tqdm.tqdm(range(1, 21))
+            for i in matrix_pbar:
+                mzn_result = Result(results[key]["mzn"][str(i)])
+                asp_result = Result(results[key]["asp"][str(i)])
 
-            current_mzn_dir = "../minizinc/results/size_" + str(n) + "/" + str(i)
-            if not check_dir_existence(current_mzn_dir):
-                os.makedirs(current_mzn_dir)
+                current_mzn_dir = "../minizinc/results/size_" + str(n) + "/" + str(i)
+                if not check_dir_existence(current_mzn_dir):
+                    os.makedirs(current_mzn_dir)
 
-            gen_matrix_fig(
-                mzn_result.start_matrix,
-                mzn_result.hearts,
-                mzn_result.clubs,
-                mzn_result.spades,
-                mzn_result.diamonds,
-                current_mzn_dir + "/start.png"
-            )
-            for count, step in enumerate(mzn_result.steps):
-                if count == len(mzn_result.steps) - 1:
-                    gen_matrix_fig(
-                        step.matrix,
-                        mzn_result.hearts,
-                        mzn_result.clubs,
-                        mzn_result.spades,
-                        mzn_result.diamonds,
-                        current_mzn_dir + "/step_" + str(step.number) + ".png",
-                        step.score,
-                        mzn_result.exe_time
-                    )
-                else:
-                    gen_matrix_fig(
-                        step.matrix,
-                        mzn_result.hearts,
-                        mzn_result.clubs,
-                        mzn_result.spades,
-                        mzn_result.diamonds,
-                        current_mzn_dir + "/step_" + str(step.number) + ".png",
-                        step.score
-                    )
+                gen_matrix_fig(
+                    mzn_result.start_matrix,
+                    mzn_result.hearts,
+                    mzn_result.clubs,
+                    mzn_result.spades,
+                    mzn_result.diamonds,
+                    current_mzn_dir + "/start.png"
+                )
 
-            current_asp_dir = "../asp/results/size_" + str(n) + "/" + str(i)
-            if not check_dir_existence(current_asp_dir):
-                os.makedirs(current_asp_dir)
+                step_pbar = tqdm.tqdm(mzn_result.steps)
+                for count, step in enumerate(step_pbar):
+                    if count == len(mzn_result.steps) - 1:
+                        gen_matrix_fig(
+                            step.matrix,
+                            mzn_result.hearts,
+                            mzn_result.clubs,
+                            mzn_result.spades,
+                            mzn_result.diamonds,
+                            current_mzn_dir + "/step_" + str(step.number) + ".png",
+                            step.score,
+                            mzn_result.exe_time
+                        )
+                    else:
+                        gen_matrix_fig(
+                            step.matrix,
+                            mzn_result.hearts,
+                            mzn_result.clubs,
+                            mzn_result.spades,
+                            mzn_result.diamonds,
+                            current_mzn_dir + "/step_" + str(step.number) + ".png",
+                            step.score
+                        )
+                    step_pbar.set_description("Plotting Minizinc step # %d" % count)
 
-            gen_matrix_fig(
-                asp_result.start_matrix,
-                asp_result.hearts,
-                asp_result.clubs,
-                asp_result.spades,
-                asp_result.diamonds,
-                current_asp_dir + "/start.png"
-            )
-            for count, step in enumerate(asp_result.steps):
-                if count == len(asp_result.steps) - 1:
-                    gen_matrix_fig(
-                        step.matrix,
-                        asp_result.hearts,
-                        asp_result.clubs,
-                        asp_result.spades,
-                        asp_result.diamonds,
-                        current_asp_dir + "/step_" + str(step.number) + ".png",
-                        step.score,
-                        asp_result.exe_time
-                    )
-                else:
-                    gen_matrix_fig(
-                        step.matrix,
-                        asp_result.hearts,
-                        asp_result.clubs,
-                        asp_result.spades,
-                        asp_result.diamonds,
-                        current_asp_dir + "/step_" + str(step.number) + ".png",
-                        step.score
-                    )
+                current_asp_dir = "../asp/results/size_" + str(n) + "/" + str(i)
+                if not check_dir_existence(current_asp_dir):
+                    os.makedirs(current_asp_dir)
+
+                gen_matrix_fig(
+                    asp_result.start_matrix,
+                    asp_result.hearts,
+                    asp_result.clubs,
+                    asp_result.spades,
+                    asp_result.diamonds,
+                    current_asp_dir + "/start.png"
+                )
+
+                step_pbar = tqdm.tqdm(asp_result.steps)
+                for count, step in enumerate(step_pbar):
+                    if count == len(asp_result.steps) - 1:
+                        gen_matrix_fig(
+                            step.matrix,
+                            asp_result.hearts,
+                            asp_result.clubs,
+                            asp_result.spades,
+                            asp_result.diamonds,
+                            current_asp_dir + "/step_" + str(step.number) + ".png",
+                            step.score,
+                            asp_result.exe_time
+                        )
+                    else:
+                        gen_matrix_fig(
+                            step.matrix,
+                            asp_result.hearts,
+                            asp_result.clubs,
+                            asp_result.spades,
+                            asp_result.diamonds,
+                            current_asp_dir + "/step_" + str(step.number) + ".png",
+                            step.score
+                        )
+                    step_pbar.set_description("Plotting ASP step # %d" % count)
+                matrix_pbar.set_description("Processing matrix # %d" % i)
+
+    chime.theme("big-sur")
+    chime.success()
