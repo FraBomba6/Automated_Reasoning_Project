@@ -9,20 +9,20 @@ int: diamonds; % --> 4
 array[1..n, 1..n] of var 0..5: m;
 var int: p;
 
-% Given the number of cards for each suit the program must not exceed that number
 constraint global_cardinality_low_up([m[i,j] | i,j in 1..n], 1..1, [0 | k in 1..1], [hearts | k in 1..1]);
 constraint global_cardinality_low_up([m[i,j] | i,j in 1..n], 2..2, [0 | k in 2..2], [clubs | k in 2..2]);
 constraint global_cardinality_low_up([m[i,j] | i,j in 1..n], 3..3, [0 | k in 3..3], [spades | k in 3..3]);
 constraint global_cardinality_low_up([m[i,j] | i,j in 1..n], 4..4, [0 | k in 4..4], [diamonds | k in 4..4]);
 
-% Maximum 3 equals values on a row
-constraint forall(i in 1..n)(
-  global_cardinality_low_up([m[i,j] | j in 1..n], 1..4, [0 | k in 1..4], [3 | k in 1..4])
-);
-
-% Maximum 3 equals values on a column
-constraint forall(j in 1..n)(
-  global_cardinality_low_up([m[i,j] | i in 1..n], 1..4, [0 | k in 1..4], [3 | k in 1..4])
+constraint forall(i in 1..n, j in 1..n-3)(
+  if m[i,j] == m[i,j+1] /\ m[i,j] == m[i,j+2] /\ m[i,j+1] == m[i,j+2] /\ m[i,j] != 0 /\ m[i,j] != 5
+  then m[i,j] != m[i,j+3]
+  endif
+ );
+constraint forall(j in 1..n, i in 1..n-3)(
+  if m[i,j] == m[i+1,j] /\ m[i,j] == m[i+2,j] /\ m[i+1,j] == m[i+2,j] /\ m[i,j] != 0 /\ m[i,j] != 5
+  then m[i,j] != m[i+3,j]
+  endif
 );
 
 constraint p = 

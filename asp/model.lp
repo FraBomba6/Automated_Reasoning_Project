@@ -9,12 +9,12 @@ simbolo(0..5).
 :- #count{X,Y : simbolo(S), S == 4, lato(X), lato(Y), griglia(X,Y,S)} > diamonds.
 
 :- simbolo(S), lato(X), lato(Y1), lato(Y2), lato(Y3), lato(Y4),
-   Y1 != Y2, Y1 != Y3, Y1 != Y4, Y2 != Y3, Y2 != Y4, Y3 != Y4,
+   Y1+1 == Y2, Y1+2 == Y3, Y1+3 == Y4,
    S != 5, S != 0,
    griglia(X,Y1,S), griglia(X,Y2,S), griglia(X,Y3,S), griglia(X,Y4,S).
 
 :- simbolo(S), lato(Y), lato(X1), lato(X2), lato(X3), lato(X4),
-   X1 != X2, X1 != X3, X1 != X4, X2 != X3, X2 != X4, X3 != X4,
+   X1+1 == X2, X1+2 == X3, X1+3 == X4,
    S != 5, S != 0,
    griglia(X1,Y,S), griglia(X2,Y,S), griglia(X3,Y,S), griglia(X4,Y,S).
 
