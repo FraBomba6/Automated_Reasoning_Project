@@ -7,3 +7,4 @@ asp/data
 results
 benchmark
 setup
+__pycache__
