@@ -1,0 +1,11 @@
+n=3;
+hearts=4;
+clubs=6;
+spades=2;
+diamonds=5;
+blocked=3;
+m=array2d(1..n, 1..n,[
+	2,_,3,
+	_,_,5,
+	5,3,5
+]);
