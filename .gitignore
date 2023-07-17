@@ -2,9 +2,6 @@ cmake-build-debug
 CMakeLists.txt
 .idea
 .DS_Store
-minizinc/data
-asp/data
-results
 benchmark
 setup
 __pycache__
