@@ -1,7 +1,7 @@
 {
     "all-satisfaction": true,
     "intermediate-solutions": true,
-    "parallel": 1,
-    "solver": "org.gecode.gecode@6.3.0",
+    "parallel": 8,
+    "solver": "org.chuffed.chuffed@0.10.4",
     "time-limit": 300000
 }

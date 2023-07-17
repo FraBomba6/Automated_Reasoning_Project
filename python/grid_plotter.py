@@ -16,78 +16,72 @@ def check_dir_existence(path: str):
 
 def gen_matrix_fig(matrix, hearts, clubs, spades, diamonds, path, colors, score=None, execution_time=None):
     matrix_size = matrix.shape[0]
-    plotHeight = max(MIN_TABLE_HEIGHT, matrix_size * 0.5)
+    plot_height = 1.4 + 0.2 * matrix_size
+    plot_width = 1.44 + 0.02 * matrix_size
     symbol_matrix = utils.symbolize_matrix(matrix)
-    fontSize = 7
-    textSize = 0.0138 * fontSize
-    colWidths = [0.2] * matrix_size
-    tableHeight = 0.225 * matrix_size
-    horizontalPadding = (1.5 - 0.2 * matrix_size) / 2
-    pl.figure(figsize=(1.5, plotHeight), dpi=200)
+    font_size = 7
+    text_size = 0.0138 * font_size
+    pl.figure(figsize=(plot_width, plot_height), dpi=600)
     pl.table(
         cellText=symbol_matrix,
-        colWidths=colWidths,
-        bbox=[
-            horizontalPadding / 1.5,
-            (plotHeight - tableHeight) / plotHeight,
-            0.2 * matrix_size / 1.5,
-            tableHeight / plotHeight
-        ],
+        loc='best',
         cellLoc='center',
-        cellColours=colors
+        cellColours=colors,
+
     )
     ax = pl.gca()
     ax.set_xticks([])
     ax.set_yticks([])
-    pl.text(0.05, 0.5 - textSize / plotHeight, "Available", fontsize=fontSize)
+    pl.axis("off")
+    pl.text(0.05, 0.5 - text_size / plot_height - matrix_size * 0.02, "Available", fontsize=font_size)
     pl.text(
         0.05,
-        0.5 - textSize * 2 / plotHeight - 0.015,
+        0.5 - text_size * 2 / plot_height - 0.015 - matrix_size * 0.02,
         "#" + utils.HEARTS_SYMBOL + "=" + str(hearts - np.count_nonzero(matrix == 1)),
-        fontsize=fontSize
+        fontsize=font_size
     )
     pl.text(
         0.05,
-        0.5 - textSize * 3 / plotHeight - 0.045,
+        0.5 - text_size * 3 / plot_height - 0.045 - matrix_size * 0.02,
         "#" + utils.CLUBS_SYMBOL + "=" + str(clubs - np.count_nonzero(matrix == 2)),
-        fontsize=fontSize
+        fontsize=font_size
     )
     pl.text(
         0.05,
-        0.5 - textSize * 4 / plotHeight - 0.075,
+        0.5 - text_size * 4 / plot_height - 0.075 - matrix_size * 0.02,
         "#" + utils.SPADES_SYMBOL + "=" + str(spades - np.count_nonzero(matrix == 3)),
-        fontsize=fontSize
+        fontsize=font_size
     )
     pl.text(
         0.05,
-        0.5 - textSize * 5 / plotHeight - 0.105,
+        0.5 - text_size * 5 / plot_height - 0.105 - matrix_size * 0.02,
         "#" + utils.DIAMONDS_SYMBOL + "=" + str(diamonds - np.count_nonzero(matrix == 4)),
-        fontsize=fontSize
+        fontsize=font_size
     )
-    pl.text(0.55, 0.5 - textSize / plotHeight, "Total", fontsize=fontSize)
+    pl.text(0.55, 0.5 - text_size / plot_height - matrix_size * 0.02, "Total", fontsize=font_size)
     pl.text(
         0.55,
-        0.5 - textSize * 2 / plotHeight - 0.015,
+        0.5 - text_size * 2 / plot_height - 0.015 - matrix_size * 0.02,
         "#" + utils.HEARTS_SYMBOL + "=" + str(hearts),
-        fontsize=fontSize
+        fontsize=font_size
     )
     pl.text(
         0.55,
-        0.5 - textSize * 3 / plotHeight - 0.045,
+        0.5 - text_size * 3 / plot_height - 0.045 - matrix_size * 0.02,
         "#" + utils.CLUBS_SYMBOL + "=" + str(clubs),
-        fontsize=fontSize
+        fontsize=font_size
     )
     pl.text(
         0.55,
-        0.5 - textSize * 4 / plotHeight - 0.075,
+        0.5 - text_size * 4 / plot_height - 0.075 - matrix_size * 0.02,
         "#" + utils.SPADES_SYMBOL + "=" + str(spades),
-        fontsize=fontSize
+        fontsize=font_size
     )
     pl.text(
         0.55,
-        0.5 - textSize * 5 / plotHeight - 0.105,
+        0.5 - text_size * 5 / plot_height - 0.105 - matrix_size * 0.02,
         "#" + utils.DIAMONDS_SYMBOL + "=" + str(diamonds),
-        fontsize=fontSize
+        fontsize=font_size
     )
     if score is not None:
         if execution_time is not None:
@@ -98,18 +92,18 @@ def gen_matrix_fig(matrix, hearts, clubs, spades, diamonds, path, colors, score=
             fontweight = "normal"
         pl.text(
             0.025,
-            0.1,
+            0.5 - text_size * 5 / plot_height - 0.155 - matrix_size * 0.02,
             "Score = " + str(score),
-            fontsize=fontSize,
+            fontsize=font_size,
             fontweight=fontweight,
             color=color
         )
     if execution_time is not None:
         pl.text(
             0.025,
-            0.1 - textSize/1.5,
+            0.5 - text_size * 5 / plot_height - 0.205 - matrix_size * 0.02,
             "Exec. time = " + str(execution_time),
-            fontsize=fontSize
+            fontsize=font_size
         )
     pl.savefig(path)
     pl.close()
@@ -173,8 +167,7 @@ def gen_matrix_plot(mat_size: int, step_num: int, is_mzn: bool, result: utils.Re
 
 
 if __name__ == '__main__':
-    for arg in range(1, len(sys.argv)):
-        file = sys.argv[arg]
+    for file in utils.open_results():
         with open(file, 'r') as f:
             results = json.load(f)
             f.close()

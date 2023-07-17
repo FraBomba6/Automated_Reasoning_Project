@@ -16,7 +16,7 @@ char *gen_date() {
           local->tm_sec); // get seconds passed after a minute (0-59)
 
   sprintf(day, "%02d", local->tm_mday);      // get day of month (1 to 31)
-  sprintf(month, "%02d", local->tm_mon + 2); // get month of year (0 to 11)
+  sprintf(month, "%02d", local->tm_mon + 1); // get month of year (0 to 11)
   sprintf(year, "%d", local->tm_year + 1900);
   char *dir_name = malloc(40);
   strcat(dir_name, year);
@@ -33,14 +33,13 @@ char *gen_date() {
   return dir_name;
 }
 
-void evaluate_model_and_write_results(FILE *jsonptr, char *file_path,
-                                      int is_mzn) {
-  char line[1000];
+void evaluate_model_and_write_results(FILE *jsonptr, char *file_path, int is_mzn) {
+  char line[5000];
   int n, hearts, clubs, spades, diamonds;
   int line_count = 0;
-  FILE *dataptr, *shptr;
+  FILE *dataptr;
   dataptr = fopen(file_path, "r");
-  while (fgets(line, 1000, dataptr) != NULL && line_count < 5) {
+  while (fgets(line, 2000, dataptr) != NULL && line_count < 5) {
     line_count += 1;
     char *token = strtok(line, "=");
     token = strtok(NULL, "=");
@@ -75,11 +74,12 @@ void evaluate_model_and_write_results(FILE *jsonptr, char *file_path,
       fprintf(jsonptr, "%s", ",\n");
     }
   }
+  fgets(line, 1000, dataptr);
   line_count = 0;
   int m[n * n], col_count;
   for (int i = 0; i < n * n; i++)
     m[i] = 0;
-  if (is_mzn)
+  if (is_mzn){
     while (line_count < n) {
       col_count = 0;
       fgets(line, 1000, dataptr);
@@ -95,6 +95,7 @@ void evaluate_model_and_write_results(FILE *jsonptr, char *file_path,
       }
       line_count += 1;
     }
+  }
   else
     do {
       int tuple_len = strlen(line) - 10;
@@ -105,6 +106,7 @@ void evaluate_model_and_write_results(FILE *jsonptr, char *file_path,
       int s = atoi(strtok(NULL, ","));
       m[x * n + y] = s;
     } while (fgets(line, 1000, dataptr) != NULL);
+
   fprintf(jsonptr, "%s", "\t\t\t\t\"m\": [");
   for (int i = 0; i < n * n; i++) {
     fprintf(jsonptr, "%d", m[i]);
@@ -114,10 +116,10 @@ void evaluate_model_and_write_results(FILE *jsonptr, char *file_path,
       fprintf(jsonptr, "%s", ", ");
   }
 
-  char mzn_command[100] =
+  char mzn_command[1000] =
       "minizinc ./minizinc/config.mpc ./minizinc/model.mzn ";
-  char asp_command[100] = "clingo --time-limit 300 ";
-  char command[100];
+  char asp_command[1000] = "clingo --time-limit 300 --configuration=jumpy --restart-on-model -t 8,split ";
+  char command[1000];
   if (is_mzn) {
     strcpy(command, mzn_command);
     strcat(command, file_path);
@@ -129,9 +131,9 @@ void evaluate_model_and_write_results(FILE *jsonptr, char *file_path,
 
   clock_t start = clock_gettime_nsec_np(CLOCK_MONOTONIC);
   fprintf(jsonptr, "%s", "\t\t\t\t\"steps\":[\n");
-  shptr = popen(command, "r");
+  FILE *shptr = popen(command, "r");
   int step_count = 1;
-  while (fgets(line, 1000, shptr) != NULL) {
+  while (fgets(line, 2000, shptr) != NULL) {
     printf("%s", line);
     if (step_count != 1 && strncmp(line, "griglia", 7) == 0)
       fprintf(jsonptr, "%s", ",\n");
@@ -211,9 +213,9 @@ int main(int argc, char **argv) {
       if (mzn_dirent->d_type == DT_REG) {
         file_count += 1;
         int file_number = atoi(mzn_dirent->d_name);
-        printf(".---------------------------------------------.\n"
-               "| Working on size %d with data file %s|\n"
-               "'---------------------------------------------'\n",
+        printf(".-----------------------------------------------------.\n"
+               "| MiniZinc: working on size %d with data file %s|\n"
+               "'-----------------------------------------------------'\n",
                atoi(token), mzn_dirent->d_name);
         char mzn_file_path[100];
         strcpy(mzn_file_path, mzn_dir_path);
@@ -235,10 +237,10 @@ int main(int argc, char **argv) {
       if (asp_dirent->d_type == DT_REG) {
         file_count += 1;
         int file_number = atoi(asp_dirent->d_name);
-        printf(".-----------------------------------.\n"
-               "| Working on data file %s |\n"
-               "'-----------------------------------'\n",
-               asp_dirent->d_name);
+        printf(".-----------------------------------------.\n"
+               "| ASP: working on size %d on data file %s |\n"
+               "'-----------------------------------------'\n",
+               atoi(token), asp_dirent->d_name);
         char asp_file_path[100];
         strcpy(asp_file_path, asp_dir_path);
         strcat(asp_file_path, "/");

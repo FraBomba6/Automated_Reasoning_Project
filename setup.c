@@ -122,6 +122,9 @@ void gen_dzn(int n, int hearts, int clubs, int spades, int diamonds,
   fprintf(fptr, "%s", "diamonds=");
   fprintf(fptr, "%d", diamonds);
   fprintf(fptr, "%s", ";\n");
+  fprintf(fptr, "%s", "blocked=");
+  fprintf(fptr, "%d", cells_l);
+  fprintf(fptr, "%s", ";\n");
   fprintf(fptr, "%s", "m=array2d(1..n, 1..n,[\n");
   for (int x = 0; x < n; x++) {
     fprintf(fptr, "%s", "\t");

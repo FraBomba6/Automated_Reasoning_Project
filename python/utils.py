@@ -1,5 +1,14 @@
 import numpy as np
 import math
+import tkinter as tk
+from tkinter import filedialog
+
+
+def open_results():
+    root = tk.Tk()
+    root.withdraw()
+    return filedialog.askopenfilenames(initialdir='../results', filetypes=[("JSON files", "*.json")])
+
 
 HEARTS_SYMBOL = u"\u2661"
 CLUBS_SYMBOL = u"\u2663"
